@@ -7,9 +7,6 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,15 +25,6 @@ public class UserController {
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        // проверяем выполнение необходимых условий
-        if (user.getLogin().trim().indexOf(" ") > 0) {
-            log.warn("Ошибка при создании пользователя {}: Логин не может содержать пробелы!", user);
-            throw new ValidationException("Логин не может содержать пробелы!");
-        }
-        if (user.getBirthday().isAfter(LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault()))) {
-            log.warn("Ошибка при создании пользователя {}: Дата рождения не может быть в будущем!", user);
-            throw new ValidationException("Дата рождения не может быть в будущем!");
-        }
         if (user.getName() == null || user.getName().isBlank()) {
            user.setName(user.getLogin());
         }
@@ -57,14 +45,6 @@ public class UserController {
         }
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
-            if (newUser.getLogin().trim().indexOf(" ") > 0) {
-                log.warn("Ошибка при обновлении пользователя {}: Логин не может содержать пробелы!", newUser);
-                throw new ValidationException("Логин не может содержать пробелы!");
-            }
-            if (newUser.getBirthday().isAfter(LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault()))) {
-                log.warn("Ошибка при обновлении пользователя {}: Дата рождения не может быть в будущем!", newUser);
-                throw new ValidationException("Дата рождения не может быть в будущем!");
-            }
             if (newUser.getBirthday() != null) {
                 oldUser.setBirthday(newUser.getBirthday());
             }
@@ -76,6 +56,10 @@ public class UserController {
             }
             if (newUser.getLogin() != null) {
                 oldUser.setLogin(newUser.getLogin());
+            }
+            // заменяем имя на логин, если имя пустое
+            if (oldUser.getName().isBlank()) {
+                oldUser.setName(oldUser.getLogin());
             }
             log.info("Данные пользователя {} обновлены", oldUser);
             return oldUser;

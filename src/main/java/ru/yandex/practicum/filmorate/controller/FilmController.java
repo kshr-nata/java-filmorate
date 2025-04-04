@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Slf4j
 @RestController
 @RequestMapping("/films")
@@ -26,15 +27,6 @@ public class FilmController {
 
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        // проверяем выполнение необходимых условий
-        if (film.getDescription() != null &&  film.getDescription().length() > 200) {
-            log.warn("Ошибка при создании фильма {} : Максимальная длина описания — 200 символов!", film);
-            throw new ValidationException("Максимальная длина описания — 200 символов!");
-        }
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(minReleaseDate)) {
-            log.warn("Ошибка при создании фильма {} : Дата релиза — не раньше 28 декабря 1895 года!", film);
-            throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года!");
-        }
         // формируем дополнительные данные
         film.setId(getNextId());
         // сохраняем нового пользователя в памяти приложения
@@ -52,14 +44,6 @@ public class FilmController {
         }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
-            if (newFilm.getDescription() != null && newFilm.getDescription().length() > 200) {
-                log.warn("Ошибка при обновлении фильма {}: Максимальная длина описания — 200 символов!", newFilm);
-                throw new ValidationException("Максимальная длина описания — 200 символов!");
-            }
-            if (newFilm.getReleaseDate() != null && newFilm.getReleaseDate().isBefore(minReleaseDate)) {
-                log.warn("Ошибка при обновлении фильма {}: Дата релиза — не раньше 28 декабря 1895 года!", newFilm);
-                throw new ValidationException("Дата релиза — не раньше 28 декабря 1895 года!");
-            }
             if (newFilm.getReleaseDate() != null) {
                 oldFilm.setReleaseDate(newFilm.getReleaseDate());
             }

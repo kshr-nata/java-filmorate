@@ -1,7 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -10,8 +17,19 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     private UserController controller;
     private User validUser;
@@ -41,118 +59,140 @@ class UserControllerTest {
         assertTrue(users.contains(validUser), "Пользователь должен быть в списке");
     }
 
+    @SneakyThrows
     @Test
-    void create_ShouldSetLoginAsName_WhenNameIsEmpty() {
-        User userWithEmptyName = User.builder()
-                .email("test@mail.ru")
-                .login("emptyNameUser")
-                .name("")
-                .birthday(LocalDate.of(1990, 1, 1))
-                .build();
-        User createdUser = controller.create(userWithEmptyName);
-        assertEquals(userWithEmptyName.getLogin(), createdUser.getName(),
-                "Если имя пустое, должен использоваться логин");
+    void createUser_ValidData_ReturnsOk() {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.name").value("Valid Name"));
     }
 
+    @SneakyThrows
     @Test
-    void create_ShouldThrowValidationException_WhenLoginHasSpaces() {
-        final User userWithSpacesInLogin = User.builder()
-                .email("test@mail.ru")
-                .login("invalid login")
-                .birthday(LocalDate.of(1990, 1, 1))
-                .build();
-        assertThrows(ValidationException.class,
-                () -> controller.create(userWithSpacesInLogin),
-                "Логин с пробелами должен вызывать ValidationException"
-        );
+    void createUser_EmptyName_SetsNameAsLogin() {
+        User user = validUser.toBuilder().name("").build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(user.getLogin()));
     }
 
+    @SneakyThrows
     @Test
-    void create_ShouldThrowValidationException_WhenBirthdayInFuture() {
-        User userWithFutureBirthday = User.builder()
-                .email("test@mail.ru")
-                .login("futureBirthdayUser")
+    void createUser_InvalidEmail_ReturnsBadRequest() {
+        User user = validUser.toBuilder().email("not-an-email").build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @SneakyThrows
+    @Test
+    void createUser_LoginWithSpaces_ReturnsBadRequest() {
+        User user = validUser.toBuilder().login("login with spaces").build();
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @SneakyThrows
+    @Test
+    void createUser_FutureBirthday_ReturnsBadRequest() {
+        User user = validUser.toBuilder()
                 .birthday(LocalDate.now().plusDays(1))
                 .build();
-        assertThrows(ValidationException.class,
-                () -> controller.create(userWithFutureBirthday),
-                "Дата рождения в будущем должна вызывать ValidationException"
-        );
+
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
     }
 
+    @SneakyThrows
     @Test
-    void create_ShouldAssignId_WhenUserIsValid() {
-        User createdUser = controller.create(validUser);
-        assertNotNull(createdUser.getId(), "Пользователю должен быть присвоен ID");
+    void updateUser_ValidData_ReturnsOk() {
+        // Сначала создаем пользователя
+        String response = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andReturn().getResponse().getContentAsString();
+
+        User createdUser = objectMapper.readValue(response, User.class);
+        createdUser.setName("Updated Name");
+
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createdUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"));
     }
 
-    // ======================================== PUT /users ========================================
+    @SneakyThrows
     @Test
-    void update_ShouldThrowValidationException_WhenIdIsNull() {
-        User userWithoutId = User.builder().email("test@mail.ru").login("test").build();
-        assertThrows(ValidationException.class,
-                () -> controller.update(userWithoutId),
-                "Обновление пользователя без ID должно вызывать ValidationException"
-        );
+    void updateUser_NonExistentId_ThrowsNotFoundException() {
+        User user = validUser.toBuilder().id(999L).build();
+
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isNotFound())
+                .andExpect(result -> assertInstanceOf(NotFoundException.class, result.getResolvedException()));
     }
 
+    @SneakyThrows
     @Test
-    void update_ShouldThrowNotFoundException_WhenUserDoesNotExist() {
-        User nonExistentUser = User.builder()
-                .id(999L)
-                .email("test@mail.ru")
-                .login("test")
-                .build();
-        assertThrows(NotFoundException.class,
-                () -> controller.update(nonExistentUser),
-                "Обновление несуществующего пользователя должно вызывать NotFoundException"
-        );
+    void updateUser_MissingId_ThrowsValidationException() {
+        User user = validUser.toBuilder().id(null).build();
+
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest())
+                .andExpect(result -> assertInstanceOf(ValidationException.class, result.getResolvedException()));
+      }
+
+    @SneakyThrows
+    @Test
+    void getAllUsers_WithUsers_ReturnsUserList() {
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(validUser)));
+
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk());
     }
 
+    @SneakyThrows
     @Test
-    void update_ShouldUpdateFields_WhenUserExists() {
-        User originalUser = controller.create(validUser);
-        User updatedUser = originalUser.toBuilder()
-                .name("Updated Name")
-                .email("updated@mail.ru")
-                .build();
+    void createUser_EmptyLogin_ReturnsBadRequest() {
+        User user = validUser.toBuilder().login("").build();
 
-        User result = controller.update(updatedUser);
-        assertEquals("Updated Name", result.getName(), "Имя должно обновиться");
-        assertEquals("updated@mail.ru", result.getEmail(), "Email должен обновиться");
-    }
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isBadRequest());
+      }
 
+    @SneakyThrows
     @Test
-    void update_ShouldThrowValidationException_WhenUpdatedLoginHasSpaces() {
-        User originalUser = controller.create(validUser);
-        User invalidUser = originalUser.toBuilder().login("invalid login").build();
-
-        assertThrows(ValidationException.class,
-                () -> controller.update(invalidUser),
-                "Обновление с логином, содержащим пробелы, должно вызывать ValidationException"
-        );
-    }
-
-    @Test
-    void create_ShouldAcceptBirthdayAsToday() {
-        User userWithTodayBirthday = User.builder()
-                .email("test@mail.ru")
-                .login("todayBirthday")
+    void createUser_BirthdayExactlyToday_ReturnsOk() {
+        User user = validUser.toBuilder()
                 .birthday(LocalDate.now())
                 .build();
 
-        assertDoesNotThrow(
-                () -> controller.create(userWithTodayBirthday),
-                "Дата рождения сегодня должна быть допустима"
-        );
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(user)))
+                .andExpect(status().isOk());
     }
 
-    @Test
-    void create_ShouldGenerateIncrementalIds() {
-        User firstUser = controller.create(validUser);
-        User secondUser = controller.create(validUser.toBuilder().login("secondUser").build());
-
-        assertEquals(firstUser.getId() + 1, secondUser.getId(),
-                "ID должны инкрементироваться последовательно");
-    }
 }
