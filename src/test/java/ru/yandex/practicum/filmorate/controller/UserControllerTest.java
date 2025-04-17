@@ -12,6 +12,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -30,13 +33,14 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-
     private UserController controller;
     private User validUser;
 
     @BeforeEach
     void beforeEach() {
-        controller = new UserController();
+        UserStorage userStorage = new InMemoryUserStorage();
+        UserService userService = new UserService(userStorage);
+        controller = new UserController(userService);
         validUser = User.builder()
                 .email("test@mail.ru")
                 .login("validLogin")
