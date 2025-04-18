@@ -10,6 +10,9 @@ import lombok.EqualsAndHashCode;
 import ru.yandex.practicum.filmorate.validation.NotBeforeDate;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -29,4 +32,21 @@ public class Film {
     LocalDate releaseDate;
     @Positive(message = "Длительность должна быть положительной")
     Integer duration;
+    Set<Long> likes;
+
+    public Set<Long> getLikes() {
+        if (likes == null) {
+            return new HashSet<>();
+        }
+        return likes;
+    }
+
+    public static Comparator<Film> byLikesCount() {
+        return Comparator.comparingInt(film -> film.getLikes() != null ? film.getLikes().size() : 0);
+    }
+
+    public static Comparator<Film> byLikesCountDesc() {
+        return byLikesCount().reversed();
+    }
+
 }

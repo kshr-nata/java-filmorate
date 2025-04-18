@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -24,4 +26,12 @@ public class User {
     String name;
     @PastOrPresent
     LocalDate birthday;
+    Set<Long> friends;
+
+    public Set<Long> getFriends() {
+        if (friends == null) {
+            return new HashSet<>();
+        }
+        return friends;
+    }
 }
