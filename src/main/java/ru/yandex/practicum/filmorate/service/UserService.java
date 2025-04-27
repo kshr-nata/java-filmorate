@@ -46,13 +46,13 @@ public class UserService {
         User friend = findUserById(friendId);
 
         // добавляем в друзья пользователя
-        Set<Long> friends = user.getFriends();
-        friends.add(friend.getId());
+        Map<Long, Boolean> friends = user.getFriends();
+        friends.put(friend.getId(), true);
         user.setFriends(friends);
 
         // добавляем пользователя в друзья у соответствующего друга
-        Set<Long> friendsOfFriend = friend.getFriends();
-        friendsOfFriend.add(user.getId());
+        Map<Long, Boolean> friendsOfFriend = friend.getFriends();
+        friendsOfFriend.put(user.getId(), true);
         friend.setFriends(friendsOfFriend);
     }
 
@@ -62,12 +62,12 @@ public class UserService {
         User friend = findUserById(friendId);
 
         // удаляем у пользователя
-        Set<Long> friends = user.getFriends();
+        Map<Long, Boolean> friends = user.getFriends();
         friends.remove(friend.getId());
         user.setFriends(friends);
 
         // удаляем из друзей пользователя у соответствующего друга
-        Set<Long> friendsOfFriend = friend.getFriends();
+        Map<Long, Boolean> friendsOfFriend = friend.getFriends();
         friendsOfFriend.remove(user.getId());
         friend.setFriends(friendsOfFriend);
     }
@@ -75,7 +75,7 @@ public class UserService {
     public Collection<User> getFriendsByUser(Long id) {
         log.debug("Вызван метод getFriendsByUser id = {}", id);
         User user = findUserById(id);
-        return user.getFriends()
+        return user.getFriends().keySet()
                 .stream()
                 .map(this::findUserById)
                 .toList();
@@ -85,9 +85,9 @@ public class UserService {
         log.debug("Вызван метод getCommonFriends id = {}, otherId = {}", id, otherId);
         User user = findUserById(id);
         User otherUser = findUserById(otherId);
-        return user.getFriends()
+        return user.getFriends().keySet()
                 .stream()
-                .filter(otherUser.getFriends()::contains)
+                .filter(otherUser.getFriends().keySet()::contains)
                 .map(this::findUserById)
                 .toList();
     }

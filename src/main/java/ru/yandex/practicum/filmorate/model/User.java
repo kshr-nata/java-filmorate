@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -26,11 +28,11 @@ public class User {
     String name;
     @PastOrPresent
     LocalDate birthday;
-    Set<Long> friends;
+    Map<Long, Boolean> friends;  //friendId, confirmed
 
-    public Set<Long> getFriends() {
+    public Map<Long, Boolean> getFriends() {
         if (friends == null) {
-            return new HashSet<>();
+            return new HashMap<Long, Boolean>();
         }
         return friends;
     }

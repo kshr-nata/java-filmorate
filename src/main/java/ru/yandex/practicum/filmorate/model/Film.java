@@ -33,6 +33,8 @@ public class Film {
     @Positive(message = "Длительность должна быть положительной")
     Integer duration;
     Set<Long> likes;
+    Set<Long> genres;
+    Rating rating;
 
     public Set<Long> getLikes() {
         if (likes == null) {
