@@ -45,7 +45,8 @@ Template repository for Filmorate project.
 ## Примеры запросов
 
 ### 10 самых популярных фильмов
- ```SELECT 
+ ```sql
+SELECT 
     f.film_id,
     f.name AS film_name,
     COUNT(l.userId) AS likes_count
@@ -62,7 +63,8 @@ LIMIT 10;
 
 ### Общие с пользователем друзья
 -- Найти общих друзей между user1 (например, ID=1) и user2 (например, ID=2)
- ```SELECT 
+ ```sql
+SELECT 
     u.user_id,
     u.login,
     u.name,
