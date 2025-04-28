@@ -1,7 +1,7 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-# ER-Диаграмма
+## ER-Диаграмма
 ![ER-Диаграмма](./DBDiagram.png)
 
 ## Описание таблиц
