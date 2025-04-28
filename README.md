@@ -1,11 +1,12 @@
 # java-filmorate
 Template repository for Filmorate project.
 
+# ER-Диаграмма
 ![ER-Диаграмма](./DBDiagram.png)
 
 ## Описание таблиц
 
-### User
+### user
 Таблица содержит информацию о пользователях приложения:
 - `user_id`: Уникальный идентификатор пользователя.
 - `email`: Электронная почта пользователя.
@@ -13,7 +14,7 @@ Template repository for Filmorate project.
 - `name`: Имя пользователя (если не указано, используется логин).
 - `birthday`: Дата рождения пользователя.
 
-### Film
+### film
 Таблица содержит информацию о фильмах:
 - `film_id`: Уникальный идентификатор фильма.
 - `name`: Название фильма.
@@ -23,7 +24,7 @@ Template repository for Filmorate project.
 - `rating`: Строка, одно из предопределенных значений (R, NC_17, PG_13, G, PG)
 
 
-### Genre
+### genre
 Таблица содержит жанры фильмов:
 - `genre_id`: Уникальный идентификатор жанра.
 - `name`: Название жанра (например, Комедия, Драма).
@@ -57,6 +58,7 @@ GROUP BY
 ORDER BY 
     likes_count DESC
 LIMIT 10;
+```
 
 ### Общие с пользователем друзья
 -- Найти общих друзей между user1 (например, ID=1) и user2 (например, ID=2)
@@ -67,12 +69,13 @@ LIMIT 10;
     u.email
 FROM 
     user_friends uf1
-JOIN 
+INNER JOIN 
     user_friends uf2 ON uf1.friend_id = uf2.friend_id
-JOIN 
+INNER JOIN 
     user u ON uf1.friend_id = u.user_id
 WHERE 
     uf1.user_id = 1  -- ID первого пользователя
     AND uf2.user_id = 2  -- ID второго пользователя
     AND uf1.confirmed = TRUE  -- Только подтвержденные друзья (если важно)
     AND uf2.confirmed = TRUE;
+```
