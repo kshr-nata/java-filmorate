@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -10,6 +11,7 @@ import java.util.*;
 
 @Slf4j
 @Component
+@Qualifier("inMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
@@ -62,6 +64,74 @@ public class InMemoryUserStorage implements UserStorage {
         }
         log.warn("Пользователь с id = {} не найден", newUser.getId());
         throw new NotFoundException("Пользователь с id = " + newUser.getId() + " не найден");
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
+    @Override
+    public Collection<User> getFriendsByUser(Long id) {
+        User user = findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id = " + id + " не найден"));
+        return user.getFriends().keySet()
+                .stream()
+                .map(this::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Long id, Long otherId) {
+        User user = findById(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + id + " не найден"));
+        User otherUser = findById(otherId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + otherId + " не найден"));
+
+        return user.getFriends().keySet()
+                .stream()
+                .filter(otherUser.getFriends().keySet()::contains)
+                .map(this::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    @Override
+    public void addFriend(Long id, Long friendId) {
+        User user = findById(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + id + " не найден"));
+        User friend = findById(friendId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + friendId + " не найден"));
+        // добавляем в друзья пользователя
+        Map<Long, Boolean> friends = user.getFriends();
+        friends.put(friend.getId(), true);
+        user.setFriends(friends);
+
+        // добавляем пользователя в друзья у соответствующего друга
+        Map<Long, Boolean> friendsOfFriend = friend.getFriends();
+        friendsOfFriend.put(user.getId(), true);
+        friend.setFriends(friendsOfFriend);
+    }
+
+    @Override
+    public void deleteFriend(Long id, Long friendId) {
+        User user = findById(id).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + id + " не найден"));
+        User friend = findById(friendId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id = " + friendId + " не найден"));
+
+        // удаляем у пользователя
+        Map<Long, Boolean> friends = user.getFriends();
+        friends.remove(friend.getId());
+        user.setFriends(friends);
+
+        // удаляем из друзей пользователя у соответствующего друга
+        Map<Long, Boolean> friendsOfFriend = friend.getFriends();
+        friendsOfFriend.remove(user.getId());
+        friend.setFriends(friendsOfFriend);
+
     }
 
     // вспомогательный метод для генерации идентификатора нового пользователя

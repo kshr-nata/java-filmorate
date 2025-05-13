@@ -1,25 +1,19 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.validation.NotBeforeDate;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Film.
- */
 @Data
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Film {
-    @EqualsAndHashCode.Include
+public class NewFilmRequest {
     Long id;
     @NotNull
     @NotBlank
@@ -34,19 +28,7 @@ public class Film {
     Set<Genre> genres;
     Rating mpa;
 
-    public Set<Long> getLikes() {
-        if (likes == null) {
-            return new HashSet<>();
-        }
-        return likes;
+    public boolean hasGenres() {
+        return genres != null;
     }
-
-    public static Comparator<Film> byLikesCount() {
-        return Comparator.comparingInt(film -> film.getLikes() != null ? film.getLikes().size() : 0);
-    }
-
-    public static Comparator<Film> byLikesCountDesc() {
-        return byLikesCount().reversed();
-    }
-
 }

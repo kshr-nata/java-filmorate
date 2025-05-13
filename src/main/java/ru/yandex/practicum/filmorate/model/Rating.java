@@ -1,9 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
-public enum Rating {
-    G,
-    PG,
-    PG_13,
-    R,
-    NC_17
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+@Data
+public class Rating {
+    @EqualsAndHashCode.Include
+    Integer id;
+    @NotNull
+    @NotBlank
+    String name;
 }

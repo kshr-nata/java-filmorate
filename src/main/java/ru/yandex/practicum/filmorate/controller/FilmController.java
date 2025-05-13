@@ -4,8 +4,10 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.dto.NewFilmRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateFilmRequest;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -24,22 +26,22 @@ public class FilmController {
     }
 
     @GetMapping
-    public Collection<Film> findAll() {
+    public Collection<FilmDto> findAll() {
         return filmService.findAll();
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        return filmService.create(film);
+    public FilmDto create(@Valid @RequestBody NewFilmRequest request) {
+        return filmService.create(request);
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film newFilm) {
-        return filmService.update(newFilm);
+    public FilmDto update(@Valid @RequestBody UpdateFilmRequest request) {
+        return filmService.update(request);
     }
 
     @GetMapping("/{id}")
-    public Film findFilmById(@PathVariable long id) {
+    public FilmDto findFilmById(@PathVariable long id) {
        return filmService.findFilmById(id);
     }
 
@@ -54,7 +56,7 @@ public class FilmController {
     }
 
     @GetMapping("popular")
-    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+    public Collection<FilmDto> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         if (count <= 0) {
             throw new ValidationException("Размер должен быть больше нуля");
         }
