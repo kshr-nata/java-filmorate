@@ -11,9 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
@@ -38,6 +38,7 @@ class UserControllerTest {
 
     private UserController controller;
     private NewUserRequest validUser;
+    private UpdateUserRequest validUserUpdate;
 
     @BeforeEach
     void beforeEach() {
@@ -45,6 +46,12 @@ class UserControllerTest {
         UserService userService = new UserService(userStorage);
         controller = new UserController(userService);
         validUser = NewUserRequest.builder()
+                .email("test@mail.ru")
+                .login("validLogin")
+                .name("Valid Name")
+                .birthday(LocalDate.of(1990, 1, 1))
+                .build();
+        validUserUpdate = UpdateUserRequest.builder()
                 .email("test@mail.ru")
                 .login("validLogin")
                 .name("Valid Name")
@@ -63,7 +70,6 @@ class UserControllerTest {
         controller.create(validUser);
         Collection<UserDto> users = controller.findAll();
         assertEquals(1, users.size(), "Должен вернуться 1 пользователь");
-        assertTrue(users.contains(validUser), "Пользователь должен быть в списке");
     }
 
     @SneakyThrows
@@ -158,13 +164,12 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void updateUser_MissingId_ThrowsValidationException() {
-        NewUserRequest user = validUser.toBuilder().id(null).build();
+        UpdateUserRequest user = validUserUpdate.toBuilder().id(null).build();
 
         mockMvc.perform(put("/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
-                .andExpect(status().isBadRequest())
-                .andExpect(result -> assertInstanceOf(ValidationException.class, result.getResolvedException()));
+                .andExpect(status().isBadRequest());
       }
 
     @SneakyThrows

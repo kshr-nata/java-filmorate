@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -24,8 +23,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     FROM films f INNER JOIN ratings r on f.rating_id = r.id WHERE f.id = ?""";
     private static final String INSERT_QUERY = "INSERT INTO films(name, description, release_date, duration, rating_id)" +
             "VALUES (?, ?, ?, ?, ?)";
-    private static final String INSERT_QUERY_WITHOUT_MPA = "INSERT INTO films(name, description, release_date, duration)" +
-            "VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = """
     UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?,
     rating_id = ? WHERE id = ?""";

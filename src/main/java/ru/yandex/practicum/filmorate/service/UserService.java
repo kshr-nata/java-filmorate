@@ -34,6 +34,9 @@ public class UserService {
     }
 
     public UserDto create(NewUserRequest request) {
+        if (request.getName() == null || request.getName().isBlank()) {
+            request.setName(request.getLogin());
+        }
         User user = userStorage.create(UserMapper.mapToUser(request));
         return UserMapper.mapToUserDto(user);
     }

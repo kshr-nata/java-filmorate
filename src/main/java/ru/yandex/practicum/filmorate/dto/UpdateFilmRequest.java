@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Rating;
+import ru.yandex.practicum.filmorate.validation.NotBeforeDate;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -14,6 +15,7 @@ public class UpdateFilmRequest {
     Long id;
     String name;
     String description;
+    @NotBeforeDate()
     LocalDate releaseDate;
     Integer duration;
     Rating mpa;

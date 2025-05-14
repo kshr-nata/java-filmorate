@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -12,7 +12,8 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-public class GenreDbStorage extends BaseRepository<Genre> {
+@Qualifier("genreDbStorage")
+public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM genres";
     private static final String FIND_BY_ID_QUERY = "SELECT * FROM genres WHERE id = ?";
@@ -30,14 +31,17 @@ public class GenreDbStorage extends BaseRepository<Genre> {
         super(jdbc, mapper);
     }
 
+    @Override
     public Collection<Genre> findAll() {
         return findMany(FIND_ALL_QUERY);
     }
 
+    @Override
     public Optional<Genre> findById(Integer id) {
         return findOne(FIND_BY_ID_QUERY, id);
     }
 
+    @Override
     public void createFilmGenres(long filmId, int genreId) {
         insert(INSERT_INTO_FILM_GENRES_QUERY,
                 false,
@@ -45,10 +49,12 @@ public class GenreDbStorage extends BaseRepository<Genre> {
                 genreId);
     }
 
+    @Override
     public void deleteFilmGenres(long filmId) {
         delete(DELETE_FROM_FILM_GENRES_QUERY, filmId);
     }
 
+    @Override
     public Collection<Genre> findAllByFilmId(Long filmId) {
         return findMany(FIND_ALL_BY_FILM_ID_QUERY, filmId);
     }

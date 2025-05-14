@@ -23,14 +23,18 @@ CREATE TABLE IF NOT EXISTS users (
           );
 CREATE TABLE IF NOT EXISTS film_genres (
             film_id BIGINT REFERENCES films(id) NOT NULL,
-            genre_id INT REFERENCES genres(id) NOT NULL
+            genre_id INT REFERENCES genres(id) NOT NULL,
+            PRIMARY KEY (film_id, genre_id)
           );
 CREATE TABLE IF NOT EXISTS user_friends (
             user_id BIGINT REFERENCES users(id) NOT NULL,
             friend_id BIGINT REFERENCES users(id) NOT NULL,
-            confirmed BOOLEAN NOT NULL
+            confirmed BOOLEAN NOT NULL,
+            PRIMARY KEY (user_id, friend_id),
+            CONSTRAINT check_not_self_friend CHECK (user_id != friend_id)
           );
 CREATE TABLE IF NOT EXISTS likes (
             user_id BIGINT REFERENCES users(id) NOT NULL,
-            film_id BIGINT REFERENCES films(id) NOT NULL
+            film_id BIGINT REFERENCES films(id) NOT NULL,
+            PRIMARY KEY (user_id, film_id)
           );
