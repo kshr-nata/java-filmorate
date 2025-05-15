@@ -17,10 +17,10 @@ public interface UserStorage {
 
     Collection<User> getFriendsByUser(Long id);
 
-    public Collection<User> getCommonFriends(Long id, Long otherId);
+    Collection<User> getCommonFriends(Long id, Long otherId);
 
-    public void addFriend(Long id, Long friendId);
+    void addFriend(Long id, Long friendId);
 
-    public void deleteFriend(Long id, Long friendId);
+    void deleteFriend(Long id, Long friendId);
 
 }

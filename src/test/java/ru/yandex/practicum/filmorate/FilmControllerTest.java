@@ -53,9 +53,7 @@ class FilmControllerTest {
         validFilm.setMpa(mpa);
         FilmStorage filmStorage = new InMemoryFilmStorage();
         UserStorage userStorage = new InMemoryUserStorage();
-        RatingStorage ratingStorage = new InMemoryRatingStorage();
-        GenreStorage genreStorage = new InMemoryGenreStorage();
-        FilmService filmService = new FilmService(filmStorage, userStorage, ratingStorage, genreStorage);
+        FilmService filmService = new FilmService(filmStorage, userStorage);
         controller = new FilmController(filmService);
     }
 

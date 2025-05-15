@@ -30,12 +30,20 @@ public class FilmService {
     @Autowired
     public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
                        @Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("ratingDbStorage") RatingStorage ratingStorage,
-                       @Qualifier("genreDbStorage") GenreStorage genreStorage) {
+                       RatingStorage ratingStorage,
+                       GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.ratingStorage = ratingStorage;
         this.genreStorage = genreStorage;
+    }
+
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
+                       @Qualifier("userDbStorage") UserStorage userStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
+        this.ratingStorage = null;
+        this.genreStorage = null;
     }
 
     public Collection<FilmDto> findAll() {

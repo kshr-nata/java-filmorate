@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Qualifier("genreDbStorage")
 public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM genres";

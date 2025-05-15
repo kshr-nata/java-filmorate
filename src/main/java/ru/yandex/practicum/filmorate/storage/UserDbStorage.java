@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Qualifier("userDbStorage")
 public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM users";

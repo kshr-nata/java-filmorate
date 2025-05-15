@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Qualifier("ratingDbStorage")
 public class RatingDbStorage extends BaseRepository<Rating> implements RatingStorage {
 
     private static final String FIND_ALL_QUERY = "SELECT * FROM ratings";

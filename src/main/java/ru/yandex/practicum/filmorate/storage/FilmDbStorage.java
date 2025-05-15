@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Qualifier("filmDbStorage")
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     private static final String FIND_ALL_QUERY = """

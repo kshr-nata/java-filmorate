@@ -10,7 +10,6 @@ import java.util.*;
 
 @Slf4j
 @Component
-@Qualifier("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Long, Film> films = new HashMap<>();
