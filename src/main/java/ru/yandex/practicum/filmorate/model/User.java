@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Builder(toBuilder = true)
 public class User {
     @EqualsAndHashCode.Include
     Long id;

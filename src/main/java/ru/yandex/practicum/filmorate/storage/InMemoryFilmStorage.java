@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
@@ -27,10 +26,6 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film update(Film newFilm) {
         // проверяем необходимые условия
-        if (newFilm.getId() == null) {
-            log.warn("Ошибка при обновлении фильма {}: Id должен быть указан", newFilm);
-            throw new ValidationException("Id должен быть указан");
-        }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
             if (newFilm.getReleaseDate() != null) {
@@ -55,6 +50,38 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Collection<Film> findAll() {
         return films.values();
+    }
+
+    @Override
+    public Optional<Film> findById(Long id) {
+        return Optional.ofNullable(films.get(id));
+    }
+
+    @Override
+    public void addLikeByUser(Long filmId, Long userId) {
+        Film film = findById(filmId).orElseThrow(() ->
+                new NotFoundException("Фильм с id = " + filmId + " не найден"));
+        Set<Long> likes = film.getLikes();
+        likes.add(userId);
+        film.setLikes(likes);
+    }
+
+    @Override
+    public void deleteLikeByUser(Long filmId, Long userId) {
+        Film film = findById(filmId).orElseThrow(() ->
+                new NotFoundException("Фильм с id = " + filmId + " не найден"));
+        Set<Long> likes = film.getLikes();
+        likes.remove(userId);
+        film.setLikes(likes);
+    }
+
+    @Override
+    public Collection<Film> getPopularFilms(int count) {
+        return findAll()
+                .stream()
+                .sorted(Film.byLikesCountDesc())
+                .limit(count)
+                .toList();
     }
 
     // вспомогательный метод для генерации идентификатора нового пользователя

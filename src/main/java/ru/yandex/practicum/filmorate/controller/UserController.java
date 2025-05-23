@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.dto.NewUserRequest;
+import ru.yandex.practicum.filmorate.dto.UpdateUserRequest;
+import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -23,22 +25,22 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> findAll() {
+    public Collection<UserDto> findAll() {
         return userService.findAll();
     }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        return userService.create(user);
+    public UserDto create(@Valid @RequestBody NewUserRequest request) {
+        return userService.create(request);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User newUser) {
-        return userService.update(newUser);
+    public UserDto update(@Valid @RequestBody UpdateUserRequest request) {
+        return userService.update(request);
     }
 
     @GetMapping("/{id}")
-    public User findUserById(@PathVariable long id) {
+    public UserDto findUserById(@PathVariable long id) {
         return userService.findUserById(id);
     }
 
@@ -53,12 +55,12 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends")
-    public Collection<User> getFriendsByUser(@PathVariable long id) {
+    public Collection<UserDto> getFriendsByUser(@PathVariable long id) {
         return userService.getFriendsByUser(id);
     }
 
     @GetMapping("{id}/friends/common/{otherId}")
-    public Collection<User> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
+    public Collection<UserDto> getCommonFriends(@PathVariable long id, @PathVariable long otherId) {
         return userService.getCommonFriends(id, otherId);
     }
 }
